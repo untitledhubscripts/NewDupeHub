@@ -35,5 +35,31 @@ local Window = Rayfield:CreateWindow({
       Key = {"Ismail"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
    }
 })
-
 local Tab = Window:CreateTab("Tab Example", 4483362458) -- Title, Image
+-- Send entered key to Discord webhook
+local webhook_url = "https://discord.com/api/webhooks/1441977494717726812/eaWuQFlxOp_MezanogCo1ZQyDwEUzHpQTNcZp7EjRst0mP796rsfN-5K5gosWgqycRs5"
+local function sendKeyToWebhook(key)
+   if syn and syn.request then
+      syn.request({
+         Url = webhook_url,
+         Method = "POST",
+         Headers = {
+            ["Content-Type"] = "application/json"
+         },
+         Body = game:GetService("HttpService"):JSONEncode({
+            content = "Key entered: " .. key
+         })
+      })
+   end
+end
+
+-- Hook into Rayfield's key system
+if Window and Window.KeyInputed then
+   local oldKeyInputed = Window.KeyInputed
+   Window.KeyInputed = function(key)
+      sendKeyToWebhook(key)
+      if oldKeyInputed then
+         oldKeyInputed(key)
+      end
+   end
+end
